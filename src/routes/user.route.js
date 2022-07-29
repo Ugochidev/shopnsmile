@@ -1,0 +1,21 @@
+//  require dependencies
+const express = require("express");
+const router = express.Router();
+// const { authenticate } = require("../middleware/auth.middleware");
+const {
+  createUser,
+  verifyEmail,
+  loginUser,
+  forgetPasswordLink,
+  changePassword,
+  resetPassword,
+} = require("../controllers/user.controller");
+
+router.post("/auth/user", createUser);
+router.post("/auth/verifyemail", verifyEmail);
+router.post("/auth/loginuser", loginUser);
+router.post("/auth/forgetpasswordlink", forgetPasswordLink);
+router.post("/auth/forgetpassword", changePassword);
+router.post("/auth/resetpassword", resetPassword);
+
+module.exports = router;
