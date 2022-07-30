@@ -1,7 +1,7 @@
 //  require dependencies
 const express = require("express");
 const router = express.Router();
-const { authenticate, authorize } = require("../middleware/auth.middleware");
+// const { authenticate, authorize } = require("../middleware/auth.middleware");
 const {
   createAdmin,
   verifyEmailAdmin,
@@ -19,12 +19,12 @@ router.post("/auth/admin", createAdmin);
 router.get("/auth/verifyemailadmin", verifyEmailAdmin);
 router.post("/auth/resendverificationmailadmin", resendVerificationMailAdmin);
 router.post("/auth/loginadmin", loginAdmin);
-router.get("/auth/getallusers", authenticate, authorize, getAllUsers);
-router.get("/auth/countusers", authenticate, authorize, countUsers);
-router.get("/auth/resetpassword", authenticate, resetPassword);
-router.get("/auth/getsingleuser", authenticate, authorize, getSingleUser);
+router.get("/auth/getallusers", getAllUsers);
+router.get("/auth/countusers", countUsers);
+router.get("/auth/resetpassword", resetPassword);
+router.get("/auth/getsingleuser", getSingleUser);
 router.get("/auth/forgetpasswordlink", forgetPasswordLink);
-router.get("/auth/changeassword", authenticate, changePassword);
+router.get("/auth/changeassword", changePassword);
 
 //    exporting modules
 module.exports = router;
