@@ -5,6 +5,7 @@ const router = express.Router();
 const {
   createUser,
   verifyEmail,
+  resendVerificationMail,
   loginUser,
   forgetPasswordLink,
   changePassword,
@@ -12,7 +13,8 @@ const {
 } = require("../controllers/user.controller");
 
 router.post("/auth/user", createUser);
-router.post("/auth/verifyemail", verifyEmail);
+router.post("/auth/verifyemailuser", verifyEmail);
+router.post("/auth/resendverificationmailuser", resendVerificationMail);
 router.post("/auth/loginuser", loginUser);
 router.post("/auth/forgetpasswordlink", forgetPasswordLink);
 router.post("/auth/forgetpassword", changePassword);

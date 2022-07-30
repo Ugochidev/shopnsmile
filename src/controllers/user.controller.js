@@ -48,7 +48,7 @@ const createUser = async (req, res, next) => {
     let mailOptions = {
       to: newUser.email,
       subject: "Verify Email",
-      text: `Hi ${firstName}, Pls verify your email. ${url}`,
+      text: `Hi ${newUser.firstName.toUpperCase()}, Pls verify your email. ${url}`,
     };
     sendMail(mailOptions);
     return res.status(201).json({
@@ -87,34 +87,64 @@ const verifyEmail = async (req, res, next) => {
     });
   }
 };
+
+
+const resendVerificationMail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    await validateEmail.validateAsync(req.body);
+    const emailExists = await User.findOne({ email });
+    if (!emailExists) {
+      return res.status(400).json({
+        message: "  This email does not exist, please sign up.",
+      });
+    }
+    if (emailExists.isVerified) {
+      return res.status(400).json({
+        message: "This email has already been verified.",
+      });
+    }
+    const url = "shopNsmile.com";
+    let mailOptions = {
+      to: emailExists.email,
+      subject: "Verify Email",
+      text: `Hi ${emailExists.firstName.toUpperCase()}, Pls verify your email. ${url}`,
+    };
+    sendMail(mailOptions);
+    return res.status(200).json({
+      message: `Hi ${emailExists.firstName.toUpperCase()}, Please check your email for verification.`,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: `${error.message}, Try again later.`,
+    });
+  }
+};
 // logging in a user
 const loginUser = async (req, res, next) => {
   try {
-    const { phoneNumber, password } = req.body;
+    const { email, password } = req.body;
     await UserLogin.validateAsync(req.body);
-    const phoneNumberExist = await User.findOne({ phoneNumber });
-    if (!phoneNumberExist) {
+    const emailExist = await User.findOne({ email });
+    if (!emailExist) {
       return res.status(400).json({
-        message: "PhoneNumber does not exist please sign-up",
+        message: "email does not exist please sign-up",
       });
     }
-    let isPasswordExist = await bcrypt.compare(
-      password,
-      phoneNumberExist.password
-    );
-    if (!isPasswordExist) {
+    let isemailExist = await bcrypt.compare(password, emailExist.password);
+    if (!isemailExist) {
       return res.status(400).json({
         message: "Invalid credientials",
       });
     }
-    if (phoneNumberExist.role == "User") {
+    if (emailExist.role == "User") {
       return res.status(401).json({ message: "Unauthorized" });
     }
     if (!emailExist.isVerified) {
       return res.status(401).json({ message: "Admin not verified" });
     }
     const data = {
-      id: phoneNumberExist._id,
+      id: emailExist._id,
     };
 
     const token = await jwt.sign(data, process.env.SECRET_TOKEN, {
@@ -130,24 +160,24 @@ const loginUser = async (req, res, next) => {
 const forgetPasswordLink = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const EmailExist = await User.findOne({ email });
-    if (!EmailExist) {
+    const emailExist = await User.findOne({ email });
+    if (!emailExist) {
       return res.status(400).json({ message: "Email does not exist" });
     }
     const data = {
-      id: EmailExist._id,
+      id: emailExist._id,
     };
     // getting a secret token
     const secret_key = process.env.SECRET_TOKEN;
     const token = await jwt.sign(data, secret_key, { expiresIn: "24hr" });
     let mailOptions = {
-      to: EmailExist.email,
+      to: emailExist.email,
       subject: "Reset Password",
-      text: `Hi ${EmailExist.firstName}, Reset your password with the link below.${token}`,
+      text: `Hi ${emailExist.firstName}, Reset your password with the link below.${token}`,
     };
     sendMail(mailOptions);
     return res.status(200).json({
-      message: `Hi ${EmailExist.firstName},reset password.`,
+      message: `Hi ${emailExist.firstName},reset password.`,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -225,4 +255,5 @@ module.exports = {
   forgetPasswordLink,
   changePassword,
   resetPassword,
+  resendVerificationMail,
 };

@@ -4,12 +4,12 @@ require("dotenv").config();
 const sendMail = async (config) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
+      host: "mail.cykle.studio",
       port: 465,
       secure: true,
       auth: {
-        user: process.env.User,
-        pass: process.env.pass,
+        user: process.env.userEmail,
+        pass: process.env.userPassword,
       },
       tls: {
         rejectUnauthorized: false,

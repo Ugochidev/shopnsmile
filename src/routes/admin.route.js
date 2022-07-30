@@ -4,7 +4,8 @@ const router = express.Router();
 const { authenticate, authorize } = require("../middleware/auth.middleware");
 const {
   createAdmin,
-  verifyEmail,
+  verifyEmailAdmin,
+  resendVerificationMailAdmin,
   loginAdmin,
   getAllUsers,
   countUsers,
@@ -15,14 +16,15 @@ const {
 } = require("../controllers/admin.controller");
 //  creating a route
 router.post("/auth/admin", createAdmin);
-router.post("/auth/verifyemail", verifyEmail);
+router.get("/auth/verifyemailadmin", verifyEmailAdmin);
+router.post("/auth/resendverificationmailadmin", resendVerificationMailAdmin);
 router.post("/auth/loginadmin", loginAdmin);
-router.get("/auth/getallusers", getAllUsers);
-router.get("/auth/countusers", countUsers);
-router.get("/auth/resetpassword", resetPassword);
-router.get("/auth/getsingleuser", getSingleUser);
+router.get("/auth/getallusers", authenticate, authorize, getAllUsers);
+router.get("/auth/countusers", authenticate, authorize, countUsers);
+router.get("/auth/resetpassword", authenticate, resetPassword);
+router.get("/auth/getsingleuser", authenticate, authorize, getSingleUser);
 router.get("/auth/forgetpasswordlink", forgetPasswordLink);
-router.get("/auth/changeassword", changePassword);
+router.get("/auth/changeassword", authenticate, changePassword);
 
 //    exporting modules
 module.exports = router;

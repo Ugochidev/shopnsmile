@@ -13,13 +13,18 @@ const {
   validateLogin,
 } = require("../middleware/validiate.middleware");
 
-//  creating  Admin
 const createAdmin = async (req, res, next) => {
   try {
-    const { firstName, lastName, phoneNumber, email, password } = req.body;
-    const result = await validateRegister.validateAsync(req.body);
+    const {
+      firstName,
+      lastName,
+      phoneNumber,
+      email,
+      password,
+      confirmPassword,
+    } = req.body;
+    await validateRegister.validateAsync(req.body);
 
-    // validating phoneNumber
     const phoneNumberExist = await Admin.findOne({ phoneNumber });
     if (phoneNumberExist) {
       return res.status(400).json({
@@ -31,6 +36,11 @@ const createAdmin = async (req, res, next) => {
     if (emailExist) {
       return res.status(400).json({
         message: "email exists, please login",
+      });
+    }
+    if (confirmPassword !== password) {
+      return res.status(401).json({
+        message: "Passwords do not match.",
       });
     }
     // hashing password
@@ -64,13 +74,10 @@ const createAdmin = async (req, res, next) => {
 
 // verifying Email
 
-const verifyEmail = async (req, res, next) => {
+const verifyEmailAdmin = async (req, res, next) => {
   try {
-    const { token } = req.query;
-    const decodedToken = await jwt.verify(token, process.env.SECRET_TOKEN);
-    const admin = await Admin.findOne({ email: decodedToken.email }).select(
-      "isVerfied"
-    );
+    const { email } = req.query;
+    const admin = await Admin.findOne({ email }).select("isVerfied");
     if (admin.isVerified) {
       return res.status(200).json({
         message: "Admin verified already",
@@ -87,35 +94,63 @@ const verifyEmail = async (req, res, next) => {
     });
   }
 };
+const resendVerificationMailAdmin = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    await validateEmail.validateAsync(req.body);
+    const emailExists = await Admin.findOne({ email });
+    if (!emailExists) {
+      return res.status(400).json({
+        message: "  This email does not exist, please sign up.",
+      });
+    }
+    if (emailExists.isVerified) {
+      return res.status(400).json({
+        message: "This email has already been verified.",
+      });
+    }
+    const url = "shopNsmile.com";
+    let mailOptions = {
+      to: emailExists.email,
+      subject: "Verify Email",
+      text: `Hi ${emailExists.firstName.toUpperCase()}, Pls verify your email. ${url}`,
+    };
+    sendMail(mailOptions);
+    return res.status(200).json({
+      message: `Hi ${emailExists.firstName.toUpperCase()}, Please check your email for verification.`,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: `${error.message}, Try again later.`,
+    });
+  }
+};
 //  login for Admin
 const loginAdmin = async (req, res, next) => {
   try {
-    const { phoneNumber, password } = req.body;
+    const { email, password } = req.body;
     await validateLogin.validateAsync(req.body);
 
-    const phoneNumberExist = await Admin.findOne({ phoneNumber });
-    if (!phoneNumberExist) {
+    const emailExist = await Admin.findOne({ email });
+    if (!emailExist) {
       return res.status(400).json({
-        message: "PhoneNumber does not exist please sign-up",
+        message: "Email does not exist please sign-up",
       });
     }
-    let isPasswordExist = await bcrypt.compare(
-      password,
-      phoneNumberExist.password
-    );
-    if (!isPasswordExist) {
+    let isemailExist = await bcrypt.compare(password, emailExist.password);
+    if (!isemailExist) {
       return res.status(400).json({
         message: "Invalid credientials",
       });
     }
-    if (phoneNumberExist.role == "User") {
+    if (emailExist.role == "User") {
       return res.status(401).json({ message: "Unauthorized" });
     }
     if (!emailExist.isVerified) {
       return res.status(401).json({ message: "Admin not verified" });
     }
     const data = {
-      id: phoneNumberExist._id,
+      id: emailExist._id,
     };
 
     const token = await jwt.sign(data, process.env.SECRET_TOKEN, {
@@ -131,24 +166,24 @@ const loginAdmin = async (req, res, next) => {
 const forgetPasswordLink = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const EmailExist = await Admin.findOne({ email });
-    if (!EmailExist) {
+    const emailExist = await Admin.findOne({ email });
+    if (!emailExist) {
       return res.status(400).json({ message: "Email does not exist" });
     }
     const data = {
-      id: EmailExist._id,
+      id: emailExist._id,
     };
     // getting a secret token
     const secret_key = process.env.SECRET_TOKEN;
     const token = await jwt.sign(data, secret_key, { expiresIn: "24hr" });
     let mailOptions = {
-      to: EmailExist.email,
+      to: emailExist.email,
       subject: "Reset Password",
-      text: `Hi ${EmailExist.firstName}, Reset your password with the link below.${token}`,
+      text: `Hi ${emailExist.firstName}, Reset your password with the link below.${token}`,
     };
     sendMail(mailOptions);
     return res.status(200).json({
-      message: `Hi ${EmailExist.firstName},reset password.`,
+      message: `Hi ${emailExist.firstName},reset password.`,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -252,7 +287,8 @@ const countUsers = async (req, res, next) => {
 
 module.exports = {
   createAdmin,
-  verifyEmail,
+  verifyEmailAdmin,
+  resendVerificationMailAdmin,
   loginAdmin,
   resetPassword,
   getSingleUser,
