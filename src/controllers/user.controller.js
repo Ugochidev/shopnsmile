@@ -6,18 +6,26 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const { sendMail } = require("../DBconnect/sendMail");
 const {
-  validiateUser,
-  UserLogin,
-  validPhoneNumber,
+  validateRegister,
+  validateEmail,
+  validateLogin,
+  validatePassword,
+  validateNewPassword,
 } = require("../middleware/validiate.middleware");
 const { json } = require("express");
 
 //  creating  a user
 const createUser = async (req, res, next) => {
   try {
-    const { firstName, lastName, phoneNumber, email, password, accountNumber } =
-      req.body;
-    await validiateUser.validateAsync(req.body);
+    const {
+      firstName,
+      lastName,
+      phoneNumber,
+      email,
+      password,
+      confirmPassword,
+    } = req.body;
+    await validateRegister.validateAsync(req.body);
 
     // validating phoneNumber
     const phoneNumberExist = await User.findOne({ phoneNumber });
@@ -33,6 +41,11 @@ const createUser = async (req, res, next) => {
         message: "email exists, please login",
       });
     }
+    if (confirmPassword !== password) {
+      return res.status(401).json({
+        message: "Passwords do not match.",
+      });
+    }
     //  hashing password
     const hashPassword = await bcrypt.hash(password, 10);
     // creating a new user
@@ -42,7 +55,6 @@ const createUser = async (req, res, next) => {
       phoneNumber,
       email,
       password: hashPassword,
-      accountNumber: accountNumberGen,
     });
     const url = "shopNsmile.com";
     let mailOptions = {
@@ -54,6 +66,7 @@ const createUser = async (req, res, next) => {
     return res.status(201).json({
       message: "User created",
       //   newUser,
+      _id: newUser._id,
     });
   } catch (error) {
     return res.status(500).json({
@@ -66,11 +79,8 @@ const createUser = async (req, res, next) => {
 
 const verifyEmail = async (req, res, next) => {
   try {
-    const { token } = req.query;
-    const decodedToken = await jwt.verify(token, process.env.SECRET_TOKEN);
-    const user = await User.findOne({ email: decodedToken.email }).select(
-      "isVerified"
-    );
+    const { email } = req.query;
+    const user = await User.findOne({ email }).select("isVerified");
     if (user.isVerified) {
       return res.status(200).json({
         message: "User verified already",
@@ -78,7 +88,7 @@ const verifyEmail = async (req, res, next) => {
     }
     user.isVerified = true;
     user.save();
-    return res.status(201).json({
+    return res.status(200).json({
       message: "User verified successfully",
     });
   } catch (error) {
@@ -88,7 +98,6 @@ const verifyEmail = async (req, res, next) => {
   }
 };
 
-
 const resendVerificationMail = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -96,7 +105,7 @@ const resendVerificationMail = async (req, res, next) => {
     const emailExists = await User.findOne({ email });
     if (!emailExists) {
       return res.status(400).json({
-        message: "  This email does not exist, please sign up.",
+        message: "This email does not exist, please sign up.",
       });
     }
     if (emailExists.isVerified) {
@@ -124,7 +133,7 @@ const resendVerificationMail = async (req, res, next) => {
 const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    await UserLogin.validateAsync(req.body);
+    await validateLogin.validateAsync(req.body);
     const emailExist = await User.findOne({ email });
     if (!emailExist) {
       return res.status(400).json({
@@ -137,14 +146,11 @@ const loginUser = async (req, res, next) => {
         message: "Invalid credientials",
       });
     }
-    if (emailExist.role == "User") {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
     if (!emailExist.isVerified) {
       return res.status(401).json({ message: "Admin not verified" });
     }
     const data = {
-      id: emailExist._id,
+      _id: emailExist._id,
     };
 
     const token = await jwt.sign(data, process.env.SECRET_TOKEN, {
@@ -152,7 +158,11 @@ const loginUser = async (req, res, next) => {
     });
     return res
       .status(200)
-      .json({ message: "User logged in sucessfully", token });
+      .json({
+        message: "User logged in sucessfully",
+        _id: emailExist._id,
+        token,
+      });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -173,11 +183,11 @@ const forgetPasswordLink = async (req, res, next) => {
     let mailOptions = {
       to: emailExist.email,
       subject: "Reset Password",
-      text: `Hi ${emailExist.firstName}, Reset your password with the link below.${token}`,
+      text: `Hi ${emailExist.firstName.toUpperCase()}, Reset your password with the link below.${token}`,
     };
     sendMail(mailOptions);
     return res.status(200).json({
-      message: `Hi ${emailExist.firstName},reset password.`,
+      message: `Hi ${emailExist.firstName.toUpperCase()},reset password.`,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -187,14 +197,10 @@ const forgetPasswordLink = async (req, res, next) => {
 const changePassword = async (req, res, next) => {
   try {
     const { newPassword, confirmPassword } = req.body;
-    const { email, token } = req.query;
-    const secret_key = process.env.SECRET_TOKEN;
-    const decoded_token = await jwt.verify(token, secret_key);
-    if (decoded_token.email !== email) {
-      return res.status(404).json({message :"Email do not match."});
-    }
+    await validatePassword.validateAsync(req.body);
+    const { email} = req.query;
     if (newPassword !== confirmPassword) {
-      return res.status(401).json({ message: "Password do not match."});
+      return res.status(401).json({ message: "Password do not match." });
     }
     const hashPassword = await bcrypt.hash(confirmPassword, 10);
     await User.updateOne(
@@ -215,34 +221,34 @@ const changePassword = async (req, res, next) => {
 const resetPassword = async (req, res, next) => {
   try {
     const { oldPassword, newPassword, confirmPassword } = req.body;
-    const { email } = req.query;
-    const loggedUser = await User.findOne({ email });
-    const headerTokenEmail = await jwt.verify(
+    await validateNewPassword.validateAsync(req.body);
+    const { _id } = req.query;
+    const loggedUser = await User.findOne({ _id });
+    const headerTokenId = await jwt.verify(
       req.headers.authorization.split(" ")[1],
       process.env.SECRET_TOKEN
-    ).email;
-    if (headerTokenEmail !== loggedUser.email) {
-      return res.status(404).json({message:"Forbidden"});
-    }
+    )._id;
+    console.log(loggedUser);
+    // if (headerTokenId !== loggedUser._id) {
+    //   return res.status(404).json({ message: "Forbidden" });
+    // }
     const passwordMatch = await bcrypt.compare(
       oldPassword,
       loggedUser.password
     );
     if (!passwordMatch) {
-      return res.status(404).json({message: "Invalid" });
+      return res.status(404).json({ message: "Invalid" });
     }
     if (newPassword !== confirmPassword) {
-      return res.status(400).json({message:"Password do not match."});
+      return res.status(400).json({ message: "Password do not match." });
     }
     const hashPassword = await bcrypt.hash(confirmPassword, 10);
-    await User.updateOne(
-      { email },
-      { password: hashPassword }
-    );
+    await User.updateOne({ _id }, { password: hashPassword });
     return res.status(200).json({
       message: `Password has been updated successfully.`,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: error.message });
   }
 };

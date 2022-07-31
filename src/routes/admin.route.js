@@ -16,15 +16,15 @@ const {
 } = require("../controllers/admin.controller");
 //  creating a route
 router.post("/auth/admin", createAdmin);
-router.get("/auth/verifyemailadmin", verifyEmailAdmin);
-router.post("/auth/resendverificationmailadmin", resendVerificationMailAdmin);
-router.post("/auth/loginadmin", loginAdmin);
+router.get("/auth/verifyemail/admin", verifyEmailAdmin);
+router.post("/auth/resendverificationmail/admin", resendVerificationMailAdmin);
+router.post("/auth/login/admin", loginAdmin);
 router.get("/auth/getallusers", getAllUsers);
 router.get("/auth/countusers", countUsers);
-router.get("/auth/resetpassword", resetPassword);
+router.patch("/auth/resetpassword/admin", resetPassword);
 router.get("/auth/getsingleuser", getSingleUser);
-router.get("/auth/forgetpasswordlink", forgetPasswordLink);
-router.get("/auth/changeassword", changePassword);
+router.post("/auth/forgetpasswordlink/admin", forgetPasswordLink);
+router.patch("/auth/changeassword/admin", changePassword);
 
 //    exporting modules
 module.exports = router;

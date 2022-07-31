@@ -13,11 +13,11 @@ const {
 } = require("../controllers/user.controller");
 
 router.post("/auth/user", createUser);
-router.post("/auth/verifyemailuser", verifyEmail);
-router.post("/auth/resendverificationmailuser", resendVerificationMail);
-router.post("/auth/loginuser", loginUser);
-router.post("/auth/forgetpasswordlink", forgetPasswordLink);
-router.post("/auth/forgetpassword", changePassword);
-router.post("/auth/resetpassword", resetPassword);
+router.post("/auth/verifyemail/user", verifyEmail);
+router.post("/auth/resendverificationmail/user", resendVerificationMail);
+router.post("/auth/login/user", loginUser);
+router.post("/auth/forgetpasswordlink/user", forgetPasswordLink);
+router.patch("/auth/forgetpassword/user", changePassword);
+router.patch("/auth/resetpassword/user", resetPassword);
 
 module.exports = router;

@@ -11,6 +11,9 @@ const { sendMail } = require("../DBconnect/sendMail");
 const {
   validateRegister,
   validateLogin,
+  validateEmail,
+  validatePassword,
+  validateNewPassword,
 } = require("../middleware/validiate.middleware");
 
 const createAdmin = async (req, res, next) => {
@@ -85,7 +88,7 @@ const verifyEmailAdmin = async (req, res, next) => {
     }
     admin.isVerified = true;
     admin.save();
-    return res.status(201).json({
+    return res.status(200).json({
       message: "Admin verified successfully",
     });
   } catch (error) {
@@ -150,15 +153,17 @@ const loginAdmin = async (req, res, next) => {
       return res.status(401).json({ message: "Admin not verified" });
     }
     const data = {
-      id: emailExist._id,
+      _id: emailExist._id,
     };
 
     const token = await jwt.sign(data, process.env.SECRET_TOKEN, {
       expiresIn: "24h",
     });
-    return res
-      .status(200)
-      .json({ message: "Admin logged in sucessfully", token });
+    return res.status(200).json({
+      message: "Admin logged in sucessfully",
+      _id: emailExist._id,
+      token,
+    });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -193,12 +198,8 @@ const forgetPasswordLink = async (req, res, next) => {
 const changePassword = async (req, res, next) => {
   try {
     const { newPassword, confirmPassword } = req.body;
-    const { email, token } = req.query;
-    const secret_key = process.env.SECRET_TOKEN;
-    const decoded_token = await jwt.verify(token, secret_key);
-    if (decoded_token.email !== email) {
-      return res.status(404).json({ message: "Email do not match." });
-    }
+    await validatePassword.validateAsync(req.body);
+    const { email } = req.query;
     if (newPassword !== confirmPassword) {
       return res.status(401).json({ message: "Password do not match." });
     }
@@ -221,15 +222,19 @@ const changePassword = async (req, res, next) => {
 const resetPassword = async (req, res, next) => {
   try {
     const { oldPassword, newPassword, confirmPassword } = req.body;
-    const { email } = req.query;
-    const loggedUser = await Admin.findOne({ email });
-    const headerTokenEmail = await jwt.verify(
+    await validateNewPassword.validateAsync(req.body);
+    const { _id } = req.query;
+    const loggedUser = await Admin.findOne({ _id });
+    console.log(_id);
+    console.log(loggedUser._id);
+    const headerTokenId = await jwt.verify(
       req.headers.authorization.split(" ")[1],
       process.env.SECRET_TOKEN
-    ).email;
-    if (headerTokenEmail !== loggedUser.email) {
-      return res.status(404).json({ message: "Forbidden" });
-    }
+    )._id;
+    console.log(headerTokenId);
+    // if (headerTokenId !== loggedUser._id) {
+    //   return res.status(404).json({ message: "Forbidden" });
+    // }
     const passwordMatch = await bcrypt.compare(
       oldPassword,
       loggedUser.password
@@ -241,21 +246,27 @@ const resetPassword = async (req, res, next) => {
       return res.status(400).json({ message: "Password do not match." });
     }
     const hashPassword = await bcrypt.hash(confirmPassword, 10);
-    await User.updateOne({ email }, { password: hashPassword });
+    await User.updateOne({ _id }, { password: hashPassword });
     return res.status(200).json({
       message: `Password has been updated successfully.`,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: error.message });
   }
 };
 //  getting all Users
 const getAllUsers = async (req, res, next) => {
   try {
-    const getUsers = await User.find();
+    const user = await User.find();
     return res.status(200).json({
       message: "Get Users sucessfully",
-      getUsers,
+      // user,
+      firstName: user[0].firstName,
+      lastName: user[0].lastName,
+      Email: user[0].email,
+      Phonenumber: user[0].phoneNumber,
+      Date_joined: user[0].createdAt,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -265,10 +276,15 @@ const getAllUsers = async (req, res, next) => {
 const getSingleUser = async (req, res, next) => {
   try {
     const { _id } = req.query;
-    const singleUser = await User.find({ _id });
+    const user = await User.findOne({ _id });
     return res.status(200).json({
-      message: "Get Users sucessfully",
-      singleUser,
+      message: "Fetched sucessfully",
+      // user,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      Email: user.email,
+      Phonenumber: user.phoneNumber,
+      Date_joined: user.createdAt,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });

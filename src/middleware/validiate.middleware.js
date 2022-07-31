@@ -11,6 +11,15 @@ const validateRegister = Joi.object({
   password: Joi.string().min(8).required(),
   confirmPassword: Joi.string().min(8).required(),
 });
+const validatePassword = Joi.object({
+  password: Joi.string().min(8).required(),
+  confirmPassword: Joi.string().min(8).required(),
+});
+const validateNewPassword = Joi.object({
+  oldPassword: Joi.string().min(8).required(),
+  newPassword: Joi.string().min(8).required(),
+  confirmPassword: Joi.string().min(8).required(),
+});
 
 const validateLogin = Joi.object({
   email: Joi.string().email({
@@ -19,36 +28,17 @@ const validateLogin = Joi.object({
   }),
   password: Joi.string().min(8).required(),
 });
-
-const validiateUser = Joi.object({
-  firstName: Joi.string().min(3).max(20).required(),
-  lastName: Joi.string().min(3).max(20).required(),
-  phoneNumber: Joi.string().min(10).max(13).required(),
+const validateEmail = Joi.object({
   email: Joi.string().email({
     minDomainSegments: 2,
     tlds: { allow: ["com", "net"] },
   }),
-  password: Joi.string()
-    .min(8)
-    .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
-    .required(),
-});
-
-const UserLogin = Joi.object({
-  phoneNumber: Joi.string().min(10).max(13).required(),
-  password: Joi.string()
-    .min(8)
-    .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
-    .required(),
-});
-const validPhoneNumber = Joi.object({
-  phoneNumber: Joi.string().min(10).max(13).required(),
 });
 
 module.exports = {
   validateRegister,
   validateLogin,
-  validiateUser,
-  UserLogin,
-  validPhoneNumber,
+  validateEmail,
+  validatePassword,
+  validateNewPassword,
 };
