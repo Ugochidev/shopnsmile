@@ -22,6 +22,8 @@ const createUser = async (req, res, next) => {
       lastName,
       phoneNumber,
       email,
+      age,
+      // role,
       password,
       confirmPassword,
     } = req.body;
@@ -46,6 +48,17 @@ const createUser = async (req, res, next) => {
         message: "Passwords do not match.",
       });
     }
+    let role;
+    if (age <= 25 ) {
+      role = "BasicUser";
+    }
+     else if(age > 26 && age < 45) {
+       role = "MidUser";
+     }
+      else if (age >= 45) {
+        role = "AdvanceUser";
+      }
+    console.log(role);
     //  hashing password
     const hashPassword = await bcrypt.hash(password, 10);
     // creating a new user
@@ -54,6 +67,8 @@ const createUser = async (req, res, next) => {
       lastName,
       phoneNumber,
       email,
+      age,
+      role,
       password: hashPassword,
     });
     const url = "shopNsmile.com";
@@ -65,8 +80,8 @@ const createUser = async (req, res, next) => {
     sendMail(mailOptions);
     return res.status(201).json({
       message: "User created",
-      //   newUser,
-      _id: newUser._id,
+        newUser,
+      // _id: newUser._id,
     });
   } catch (error) {
     return res.status(500).json({
@@ -156,13 +171,11 @@ const loginUser = async (req, res, next) => {
     const token = await jwt.sign(data, process.env.SECRET_TOKEN, {
       expiresIn: "24h",
     });
-    return res
-      .status(200)
-      .json({
-        message: "User logged in sucessfully",
-        _id: emailExist._id,
-        token,
-      });
+    return res.status(200).json({
+      message: "User logged in sucessfully",
+      _id: emailExist._id,
+      token,
+    });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -198,7 +211,7 @@ const changePassword = async (req, res, next) => {
   try {
     const { newPassword, confirmPassword } = req.body;
     await validatePassword.validateAsync(req.body);
-    const { email} = req.query;
+    const { email } = req.query;
     if (newPassword !== confirmPassword) {
       return res.status(401).json({ message: "Password do not match." });
     }

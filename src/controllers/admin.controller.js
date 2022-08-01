@@ -285,6 +285,7 @@ const getSingleUser = async (req, res, next) => {
       Email: user.email,
       Phonenumber: user.phoneNumber,
       Date_joined: user.createdAt,
+      Role: user.role
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });

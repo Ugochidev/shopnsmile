@@ -36,15 +36,16 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["User"],
-      default: "User",
+      enum: ["BasicUser", "MidUser", "AdvanceUser"],
+
     },
     isVerified: {
       type: Boolean,
       default: false,
     },
-    profilePicture: {
-      type: String,
+    age: {
+      type: Number,
+      require: true
     },
     passwordChangedAt: {
       type: Date,
