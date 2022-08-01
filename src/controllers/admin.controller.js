@@ -223,18 +223,9 @@ const resetPassword = async (req, res, next) => {
   try {
     const { oldPassword, newPassword, confirmPassword } = req.body;
     await validateNewPassword.validateAsync(req.body);
-    const { _id } = req.query;
+    console.log(req.user)
+    const { _id } = req.user;
     const loggedUser = await Admin.findOne({ _id });
-    console.log(_id);
-    console.log(loggedUser._id);
-    const headerTokenId = await jwt.verify(
-      req.headers.authorization.split(" ")[1],
-      process.env.SECRET_TOKEN
-    )._id;
-    console.log(headerTokenId);
-    // if (headerTokenId !== loggedUser._id) {
-    //   return res.status(404).json({ message: "Forbidden" });
-    // }
     const passwordMatch = await bcrypt.compare(
       oldPassword,
       loggedUser.password

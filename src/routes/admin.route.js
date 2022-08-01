@@ -1,7 +1,7 @@
 //  require dependencies
 const express = require("express");
 const router = express.Router();
-// const { authenticate, authorize } = require("../middleware/auth.middleware");
+const { authenticate, authorize } = require("../middleware/auth.middleware");
 const {
   createAdmin,
   verifyEmailAdmin,
@@ -21,7 +21,7 @@ router.post("/auth/resendverificationmail/admin", resendVerificationMailAdmin);
 router.post("/auth/login/admin", loginAdmin);
 router.get("/auth/getallusers", getAllUsers);
 router.get("/auth/countusers", countUsers);
-router.patch("/auth/resetpassword/admin", resetPassword);
+router.patch("/auth/resetpassword/admin", authenticate, resetPassword);
 router.get("/auth/getsingleuser", getSingleUser);
 router.post("/auth/forgetpasswordlink/admin", forgetPasswordLink);
 router.patch("/auth/changeassword/admin", changePassword);
