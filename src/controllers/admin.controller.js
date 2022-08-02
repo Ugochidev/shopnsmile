@@ -1,7 +1,6 @@
 //  Require dependencies
 
 const Admin = require("../models/admin.model");
-const User = require("../models/user.model");
 // const { successResMsg, errorResMsg } = require("../utils/response");
 // // const AppError = require("../utils/appError");
 const jwt = require("jsonwebtoken");
@@ -66,7 +65,7 @@ const createAdmin = async (req, res, next) => {
     sendMail(mailOptions);
     return res.status(201).json({
       message: "Admin  created",
-      //   newAdmin,
+        newAdmin,
     });
   } catch (error) {
     return res.status(500).json({
@@ -154,6 +153,7 @@ const loginAdmin = async (req, res, next) => {
     }
     const data = {
       _id: emailExist._id,
+      role: emailExist.role,
     };
 
     const token = await jwt.sign(data, process.env.SECRET_TOKEN, {
@@ -223,7 +223,6 @@ const resetPassword = async (req, res, next) => {
   try {
     const { oldPassword, newPassword, confirmPassword } = req.body;
     await validateNewPassword.validateAsync(req.body);
-    console.log(req.user)
     const { _id } = req.user;
     const loggedUser = await Admin.findOne({ _id });
     const passwordMatch = await bcrypt.compare(
@@ -242,22 +241,21 @@ const resetPassword = async (req, res, next) => {
       message: `Password has been updated successfully.`,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: error.message });
   }
 };
 //  getting all Users
 const getAllUsers = async (req, res, next) => {
   try {
-    const user = await User.find();
+    const user = await Admin.find();
     return res.status(200).json({
       message: "Get Users sucessfully",
       // user,
-      firstName: user[0].firstName,
-      lastName: user[0].lastName,
-      Email: user[0].email,
-      Phonenumber: user[0].phoneNumber,
-      Date_joined: user[0].createdAt,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      Email: user.email,
+      Phonenumber: user.phoneNumber,
+      Date_joined: user.createdAt,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -267,7 +265,7 @@ const getAllUsers = async (req, res, next) => {
 const getSingleUser = async (req, res, next) => {
   try {
     const { _id } = req.query;
-    const user = await User.findOne({ _id });
+    const user = await Admin.findOne({ _id });
     return res.status(200).json({
       message: "Fetched sucessfully",
       // user,
@@ -286,7 +284,7 @@ const getSingleUser = async (req, res, next) => {
 //  counting all registered user
 const countUsers = async (req, res, next) => {
   try {
-    const usercount = await User.countDocuments();
+    const usercount = await Admin.countDocuments();
     return res.status(200).json({ message: "Users counted", usercount });
   } catch (error) {
     return res.status(500).json({ message: error.message });

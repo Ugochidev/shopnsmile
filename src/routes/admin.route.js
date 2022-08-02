@@ -19,7 +19,7 @@ router.post("/auth/admin", createAdmin);
 router.get("/auth/verifyemail/admin", verifyEmailAdmin);
 router.post("/auth/resendverificationmail/admin", resendVerificationMailAdmin);
 router.post("/auth/login/admin", loginAdmin);
-router.get("/auth/getallusers", getAllUsers);
+router.get("/auth/getallusers", authenticate, authorize, getAllUsers);
 router.get("/auth/countusers", countUsers);
 router.patch("/auth/resetpassword/admin", authenticate, resetPassword);
 router.get("/auth/getsingleuser", getSingleUser);

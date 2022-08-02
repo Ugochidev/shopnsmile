@@ -5,7 +5,6 @@ const app = express();
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config();
-const userRoute = require("./routes/user.route");
 const adminRoute = require("./routes/admin.route");
 
 //  middleware
@@ -22,7 +21,6 @@ app.get("/", function (req, res) {
 });
 
 // route
-app.use("/api/v1", userRoute);
 app.use("/api/v1", adminRoute);
 
 app.listen(PORT, async () => {
