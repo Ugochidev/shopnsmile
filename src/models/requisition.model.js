@@ -22,7 +22,11 @@ const requisitionSchema = new Schema({
     type: Number,
     required: true,
   },
-});
+},
+{
+    timestamps: true
+}
+);
 
 const Requisition = mongoose.model("Requisition", requisitionSchema);
 
