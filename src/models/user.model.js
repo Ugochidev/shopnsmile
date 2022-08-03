@@ -1,7 +1,12 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const adminSchema = new Schema(
+const userSchema = new Schema(
   {
+    userId: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     firstName: {
       type: String,
       required: true,
@@ -38,13 +43,13 @@ const adminSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["Admin"],
-      default: "Admin",
-    },
-    profilePicture: {
-      type: String,
+      enum: ["basic"],
+      default: ["basic", "supervisor", "admin", "superAdmin"],
     },
     passwordChangedAt: {
+      type: Date,
+    },
+    dateCreated: {
       type: Date,
     },
   },
@@ -54,4 +59,5 @@ const adminSchema = new Schema(
 );
 
 //    exporting modules
-module.exports = mongoose.model("Admin", adminSchema);
+const User = mongoose.model("User", userSchema);
+module.exports = User

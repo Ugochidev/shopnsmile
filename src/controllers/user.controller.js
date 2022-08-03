@@ -1,6 +1,6 @@
 //  Require dependencies
 
-const Admin = require("../models/admin.model");
+const User = require("../models/user.model");
 // const { successResMsg, errorResMsg } = require("../utils/response");
 // // const AppError = require("../utils/appError");
 const jwt = require("jsonwebtoken");
@@ -15,7 +15,7 @@ const {
   validateNewPassword,
 } = require("../middleware/validiate.middleware");
 
-const createAdmin = async (req, res, next) => {
+const createUser = async (req, res, next) => {
   try {
     const {
       firstName,
@@ -27,14 +27,14 @@ const createAdmin = async (req, res, next) => {
     } = req.body;
     await validateRegister.validateAsync(req.body);
 
-    const phoneNumberExist = await Admin.findOne({ phoneNumber });
+    const phoneNumberExist = await User.findOne({ phoneNumber });
     if (phoneNumberExist) {
       return res.status(400).json({
         message: "PhoneNumber already exist please login",
       });
     }
     // validating email
-    const emailExist = await Admin.findOne({ email });
+    const emailExist = await User.findOne({ email });
     if (emailExist) {
       return res.status(400).json({
         message: "email exists, please login",
@@ -48,8 +48,8 @@ const createAdmin = async (req, res, next) => {
     // hashing password
     const hashPassword = await bcrypt.hash(password, 10);
 
-    // create  a new Admin
-    const newAdmin = await Admin.create({
+    // create  a new User
+    const newUser = await User.create({
       firstName,
       lastName,
       phoneNumber,
@@ -58,14 +58,14 @@ const createAdmin = async (req, res, next) => {
     });
     const url = "shopNsmile.com";
     let mailOptions = {
-      to: newAdmin.email,
+      to: newUser.email,
       subject: "Verify Email",
       text: `Hi ${firstName}, Pls verify your email. ${url}`,
     };
     sendMail(mailOptions);
     return res.status(201).json({
-      message: "Admin  created",
-        newAdmin,
+      message: "User  created",
+        newUser,
     });
   } catch (error) {
     return res.status(500).json({
@@ -76,19 +76,19 @@ const createAdmin = async (req, res, next) => {
 
 // verifying Email
 
-const verifyEmailAdmin = async (req, res, next) => {
+const verifyEmail = async (req, res, next) => {
   try {
     const { email } = req.query;
-    const admin = await Admin.findOne({ email }).select("isVerfied");
+    const user = await User.findOne({ email }).select("isVerfied");
     if (admin.isVerified) {
       return res.status(200).json({
-        message: "Admin verified already",
+        message: "User verified already",
       });
     }
     admin.isVerified = true;
     admin.save();
     return res.status(200).json({
-      message: "Admin verified successfully",
+      message: "User verified successfully",
     });
   } catch (error) {
     return res.status(500).json({
@@ -96,11 +96,11 @@ const verifyEmailAdmin = async (req, res, next) => {
     });
   }
 };
-const resendVerificationMailAdmin = async (req, res, next) => {
+const resendVerificationMail = async (req, res, next) => {
   try {
     const { email } = req.body;
     await validateEmail.validateAsync(req.body);
-    const emailExists = await Admin.findOne({ email });
+    const emailExists = await User.findOne({ email });
     if (!emailExists) {
       return res.status(400).json({
         message: "  This email does not exist, please sign up.",
@@ -127,13 +127,13 @@ const resendVerificationMailAdmin = async (req, res, next) => {
     });
   }
 };
-//  login for Admin
-const loginAdmin = async (req, res, next) => {
+//  login for User
+const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     await validateLogin.validateAsync(req.body);
 
-    const emailExist = await Admin.findOne({ email });
+    const emailExist = await User.findOne({ email });
     if (!emailExist) {
       return res.status(400).json({
         message: "Email does not exist please sign-up",
@@ -149,7 +149,7 @@ const loginAdmin = async (req, res, next) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
     if (!emailExist.isVerified) {
-      return res.status(401).json({ message: "Admin not verified" });
+      return res.status(401).json({ message: "User not verified" });
     }
     const data = {
       _id: emailExist._id,
@@ -160,7 +160,7 @@ const loginAdmin = async (req, res, next) => {
       expiresIn: "24h",
     });
     return res.status(200).json({
-      message: "Admin logged in sucessfully",
+      message: "User logged in sucessfully",
       _id: emailExist._id,
       token,
     });
@@ -171,7 +171,7 @@ const loginAdmin = async (req, res, next) => {
 const forgetPasswordLink = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const emailExist = await Admin.findOne({ email });
+    const emailExist = await User.findOne({ email });
     if (!emailExist) {
       return res.status(400).json({ message: "Email does not exist" });
     }
@@ -204,7 +204,7 @@ const changePassword = async (req, res, next) => {
       return res.status(401).json({ message: "Password do not match." });
     }
     const hashPassword = await bcrypt.hash(confirmPassword, 10);
-    await Admin.updateOne(
+    await User.updateOne(
       { email },
       { password: hashPassword },
       {
@@ -224,7 +224,7 @@ const resetPassword = async (req, res, next) => {
     const { oldPassword, newPassword, confirmPassword } = req.body;
     await validateNewPassword.validateAsync(req.body);
     const { _id } = req.user;
-    const loggedUser = await Admin.findOne({ _id });
+    const loggedUser = await User.findOne({ _id });
     const passwordMatch = await bcrypt.compare(
       oldPassword,
       loggedUser.password
@@ -247,7 +247,7 @@ const resetPassword = async (req, res, next) => {
 //  getting all Users
 const getAllUsers = async (req, res, next) => {
   try {
-    const user = await Admin.find();
+    const user = await User.find();
     return res.status(200).json({
       message: "Get Users sucessfully",
       // user,
@@ -265,7 +265,7 @@ const getAllUsers = async (req, res, next) => {
 const getSingleUser = async (req, res, next) => {
   try {
     const { _id } = req.query;
-    const user = await Admin.findOne({ _id });
+    const user = await User.findOne({ _id });
     return res.status(200).json({
       message: "Fetched sucessfully",
       // user,
@@ -284,7 +284,7 @@ const getSingleUser = async (req, res, next) => {
 //  counting all registered user
 const countUsers = async (req, res, next) => {
   try {
-    const usercount = await Admin.countDocuments();
+    const usercount = await User.countDocuments();
     return res.status(200).json({ message: "Users counted", usercount });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -292,10 +292,10 @@ const countUsers = async (req, res, next) => {
 };
 
 module.exports = {
-  createAdmin,
-  verifyEmailAdmin,
-  resendVerificationMailAdmin,
-  loginAdmin,
+  createUser,
+  verifyEmail,
+  resendVerificationMail,
+  login,
   resetPassword,
   getSingleUser,
   getAllUsers,
