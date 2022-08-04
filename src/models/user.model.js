@@ -43,8 +43,8 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["basic"],
-      default: ["basic", "supervisor", "admin", "superAdmin"],
+      enum: ["basic", "supervisor", "admin", "superAdmin"],
+      default: "basic",
     },
     passwordChangedAt: {
       type: Date,

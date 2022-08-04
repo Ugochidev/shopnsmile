@@ -4,102 +4,46 @@ const Schema = mongoose.Schema;
 const productSchema = new Schema(
   {
     categories: {
-    eletronics: {
-      productId: {
-        type: String,
-      },
-      productName: {
-        type: String,
-      },
-      brandName: {
-        type: String,
-      },
-      expiryDate: {
-        type: Date,
-      },
-      quantityAvailable: {
-        type: Number,
-        required: true,
-      },
-      pricePerItem,
+      type: String,
+      required: true,
+    },
+    productId: {
+      type: String,
+      required: true,
+    },
+    productName: {
+      type: String,
+      required: true,
+    },
+    brandName: {
+      type: String,
+      required: true,
+    },
+    manufacturingDate: {
+      type: Date,
+      required: true,
+    },
+    expiryDate: {
+      type: Date,
+      required: true,
+    },
+    quantityAvailable: {
+      type: Number,
+      required: true,
+    },
+    pricePerItem: {
+      type: Number,
+      required: true,
     },
     dateCreated: {
       type: Date,
-    },
-    drinks: {
-      productId: {
-        type: String,
-      },
-      drinkName: {
-        type: String,
-      },
-      brandName: {
-        type: String,
-      },
-      manufacturingDate: {
-        type: Date,
-      },
-      expiryDate: {
-        type: Date,
-      },
-      quantityAvailable: {
-        type: Number,
-        required: true,
-      },
-      dateCreated: {
-        type: Date,
-      },
-    },
-    fashion: {
-      productId: {
-        type: String,
-      },
-      productName: {
-        type: String,
-      },
-      brandName: {
-        type: String,
-      },
-      expiryDate: {
-        type: Date,
-      },
-      quantityAvailable: {
-        type: Number,
-        required: true,
-      },
-      pricePerItem,
-    },
-    dateCreated: {
-      type: Date,
-    },
-    foodItem: {
-      productId: {
-        type: String,
-      },
-      productName: {
-        type: String,
-      },
-      brandName: {
-        type: String,
-      },
-      expiryDate: {
-        type: Date,
-      },
-      quantityAvailable: {
-        type: Number,
-        required: true,
-      },
-      pricePerItem,
-    },
-    dateCreated: {
-      type: Date,
+      required: true,
     },
   },
-},
   {
     timestamps: true,
   }
 );
 
 const Product = mongoose.model("product", productSchema);
-module.exports = Product
+module.exports = Product;

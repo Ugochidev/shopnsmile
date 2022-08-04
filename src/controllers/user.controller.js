@@ -1,8 +1,5 @@
-//  Require dependencies
-
 const User = require("../models/user.model");
-// const { successResMsg, errorResMsg } = require("../utils/response");
-// // const AppError = require("../utils/appError");
+const uuid = require("uuid");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
@@ -22,6 +19,7 @@ const createUser = async (req, res, next) => {
       lastName,
       phoneNumber,
       email,
+      role,
       password,
       confirmPassword,
     } = req.body;
@@ -50,24 +48,27 @@ const createUser = async (req, res, next) => {
 
     // create  a new User
     const newUser = await User.create({
+      userId: uuid.v4(),
       firstName,
       lastName,
       phoneNumber,
       email,
+      role: role || "basic",
       password: hashPassword,
     });
     const url = "shopNsmile.com";
     let mailOptions = {
       to: newUser.email,
       subject: "Verify Email",
-      text: `Hi ${firstName}, Pls verify your email. ${url}`,
+      text: `Hi ${newUser.firstName.toUpperCase()}, Pls verify your email. ${url}`,
     };
     sendMail(mailOptions);
     return res.status(201).json({
       message: "User  created",
-        newUser,
+      newUser,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       message: error.message,
     });
@@ -80,13 +81,13 @@ const verifyEmail = async (req, res, next) => {
   try {
     const { email } = req.query;
     const user = await User.findOne({ email }).select("isVerfied");
-    if (admin.isVerified) {
+    if (user.isVerified) {
       return res.status(200).json({
         message: "User verified already",
       });
     }
-    admin.isVerified = true;
-    admin.save();
+    user.isVerified = true;
+    user.save();
     return res.status(200).json({
       message: "User verified successfully",
     });
@@ -250,7 +251,7 @@ const getAllUsers = async (req, res, next) => {
     const user = await User.find();
     return res.status(200).json({
       message: "Get Users sucessfully",
-      // user,
+      user,
       firstName: user.firstName,
       lastName: user.lastName,
       Email: user.email,
@@ -274,7 +275,7 @@ const getSingleUser = async (req, res, next) => {
       Email: user.email,
       Phonenumber: user.phoneNumber,
       Date_joined: user.createdAt,
-      Role: user.role
+      Role: user.role,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });

@@ -4,8 +4,7 @@ const validateRegister = Joi.object({
   firstName: Joi.string().min(3).max(20).required(),
   lastName: Joi.string().min(3).max(20).required(),
   phoneNumber: Joi.string().min(10).max(13).required(),
-  age: Joi.string().min(2).max(3).required(),
-  role: Joi.string().min(10).max(13),
+  role: Joi.string(),
   email: Joi.string().email({
     minDomainSegments: 2,
     tlds: { allow: ["com", "net"] },

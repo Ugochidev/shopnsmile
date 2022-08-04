@@ -1,12 +1,20 @@
 // require dependencies
 const jwt = require("jsonwebtoken");
+const roles = require("../roles");
+const User = require("../models/user.model");
 require("dotenv").config();
 
-//  authenticating  admin
+//  authenticating  user
 const authenticate = async (req, res, next) => {
   try {
-    let authenticationArr = req.headers.authorization.split(" ");
-    if (!authenticationArr.includes("Bearer")) {
+    let authorization = req.headers.authorization;
+    if (!authorization) {
+      return res.status(401).json({
+        message: "Token is required",
+      });
+    }
+    const authenticationArr = authorization.split(" ");
+    if (authenticationArr[0] !== "Bearer") {
       return res.status(401).json({
         message: "Bearer is required",
       });
@@ -17,9 +25,13 @@ const authenticate = async (req, res, next) => {
         message: "Token is required",
       });
     }
-    const decryptToken = await jwt.verify(token, process.env.SECRET_TOKEN, {
-      expiresIn: "1h",
-    });
+    const decryptToken = await jwt.verify(token, process.env.SECRET_TOKEN);
+    const validUser = await User.findOne({ _id: decryptToken._id });
+    if (!validUser) {
+      return res.status(401).json({
+        message: "Invalid token...",
+      });
+    }
     req.user = decryptToken;
     next();
   } catch (error) {
@@ -28,22 +40,21 @@ const authenticate = async (req, res, next) => {
     });
   }
 };
-//  authenticating admin
-const authorize = async (req, res, next) => {
-  try {
-    if (req.user.role == "Admin" || req.user.role == "MidUser") {
-      next();
-    } else {
-      return res.status(401).json({
-        message: "User does not have access to this resource",
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      message: error.message,
-    });
-  }
-};
 
+const authorize = function (action, resource) {console.log("lplpl");
+  return async (req, res, next) => {console.log("lplpl");
+    try {
+      const permission = roles.can(req.user.role)[action](resource);
+      if (!permission.granted) {
+        return res.status(401).json({
+          error: "You don't have enough permission to perform this action",
+        });
+      }
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+};
 //    exporting modules
 module.exports = { authenticate, authorize };
