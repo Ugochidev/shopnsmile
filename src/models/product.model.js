@@ -20,11 +20,11 @@ const productSchema = new Schema(
       required: true,
     },
     manufacturingDate: {
-      type: Date,
+      type: String,
       required: true,
     },
     expiryDate: {
-      type: Date,
+      type: String,
       required: true,
     },
     quantityAvailable: {
@@ -36,8 +36,9 @@ const productSchema = new Schema(
       required: true,
     },
     dateCreated: {
-      type: Date,
+      type: String,
       required: true,
+      default: new Date
     },
   },
   {
@@ -45,5 +46,5 @@ const productSchema = new Schema(
   }
 );
 
-const Product = mongoose.model("product", productSchema);
+const Product = mongoose.model("Product", productSchema);
 module.exports = Product;

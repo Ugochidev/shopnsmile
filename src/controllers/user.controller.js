@@ -3,7 +3,7 @@ const uuid = require("uuid");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
-const { sendMail } = require("../DBconnect/sendMail");
+const { sendMail } = require("../utils/sendMail");
 const {
   validateRegister,
   validateLogin,
@@ -47,7 +47,7 @@ const createUser = async (req, res, next) => {
     const hashPassword = await bcrypt.hash(password, 10);
 
     // create  a new User
-    const newUser = await User.create({
+    const newUser = await User({
       userId: uuid.v4(),
       firstName,
       lastName,
@@ -56,6 +56,7 @@ const createUser = async (req, res, next) => {
       role: role || "basic",
       password: hashPassword,
     });
+    await newUser.save()
     const url = "shopNsmile.com";
     let mailOptions = {
       to: newUser.email,
@@ -145,9 +146,6 @@ const login = async (req, res, next) => {
       return res.status(400).json({
         message: "Invalid credientials",
       });
-    }
-    if (emailExist.role == "User") {
-      return res.status(401).json({ message: "Unauthorized" });
     }
     if (!emailExist.isVerified) {
       return res.status(401).json({ message: "User not verified" });

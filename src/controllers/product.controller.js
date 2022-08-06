@@ -1,4 +1,5 @@
 const Product = require("../models/product.model");
+const uuid = require("uuid")
 
 const addProduct = async (req, res, next) => {
   try {
@@ -20,10 +21,11 @@ const addProduct = async (req, res, next) => {
       expiryDate,
       quantityAvailable,
       pricePerItem,
-      dateCreated: newProduct.createdAt,
     });
-    await newProduct.save;
-    return res.status(201).json({ message: "Product added successfully." });
+    await newProduct.save();
+    return res
+      .status(201)
+      .json({ message: "Product added successfully.", newProduct });
   } catch (error) {
     return res.status(500).json({
       messsage: error.message,

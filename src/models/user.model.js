@@ -46,11 +46,10 @@ const userSchema = new Schema(
       enum: ["basic", "supervisor", "admin", "superAdmin"],
       default: "basic",
     },
-    passwordChangedAt: {
-      type: Date,
-    },
     dateCreated: {
-      type: Date,
+      type: String,
+      required: true,
+      default: new Date(),
     },
   },
   {
