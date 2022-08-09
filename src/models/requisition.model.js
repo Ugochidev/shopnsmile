@@ -3,6 +3,10 @@ const Schema = mongoose.Schema
 
 const requisitionSchema = new Schema(
   {
+    requisitionId: {
+      type: String,
+      required: true,
+    },
     productId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
@@ -13,10 +17,6 @@ const requisitionSchema = new Schema(
     },
     collectedBy: {
       type: String,
-      required: true,
-    },
-    date: {
-      type: Date.now,
       required: true,
     },
     dateCreated: {

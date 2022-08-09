@@ -151,7 +151,7 @@ const login = async (req, res, next) => {
       return res.status(401).json({ message: "User not verified" });
     }
     const data = {
-      _id: emailExist._id,
+      userId: emailExist.userId,
       role: emailExist.role,
     };
 
@@ -246,15 +246,12 @@ const resetPassword = async (req, res, next) => {
 //  getting all Users
 const getAllUsers = async (req, res, next) => {
   try {
-    const user = await User.find();
+    const user = await User.find().select(
+      "userId firstName lastName email phoneNumber dateCreated"
+    );
     return res.status(200).json({
       message: "Get Users sucessfully",
       user,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      Email: user.email,
-      Phonenumber: user.phoneNumber,
-      Date_joined: user.createdAt,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -263,11 +260,13 @@ const getAllUsers = async (req, res, next) => {
 
 const getSingleUser = async (req, res, next) => {
   try {
-    const { _id } = req.query;
-    const user = await User.findOne({ _id });
+    const { userId } = req.query;
+    const user = await User.findOne({ userId });
+    console.log(user);
     return res.status(200).json({
       message: "Fetched sucessfully",
       // user,
+      userId: user.userId,
       firstName: user.firstName,
       lastName: user.lastName,
       Email: user.email,

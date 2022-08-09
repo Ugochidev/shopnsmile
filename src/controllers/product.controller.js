@@ -1,5 +1,5 @@
 const Product = require("../models/product.model");
-const uuid = require("uuid")
+const uuid = require("uuid");
 
 const addProduct = async (req, res, next) => {
   try {
@@ -57,7 +57,7 @@ const fetchSingleProduct = async (req, res, next) => {
     }
     return res
       .status(200)
-      .json({ message: "Product fetched successfully ....", allProducts });
+      .json({ message: "Product fetched successfully ....", product });
   } catch (error) {
     return res.status(500).json({
       messsage: error.message,
@@ -66,8 +66,9 @@ const fetchSingleProduct = async (req, res, next) => {
 };
 const fetchProductByCategory = async (req, res, next) => {
   try {
-    const { categories } = req.query;
-    const category = await Product.findOne({ categories });
+    const { categories } = req.body;
+    const category = await Product.find({ categories });
+    console.log(category);
     if (!category) {
       return res.status(404).json({ message: "NO product found" });
     }
@@ -84,18 +85,23 @@ const fetchProductByCategory = async (req, res, next) => {
 const fetchProductByname = async (req, res, next) => {
   try {
     const { productName } = req.body;
-    const product = await Product.find();
+    const product = await Product.find({ productName });
+    console.log(productName);
+    console.log(product);
     if (!product) {
       return res.status(400).json({
         message: "Bad request.",
       });
     }
-    const searchResult = [];
-    product.forEach((result) => {
+    let searchResult = [];
+    product.forEach(result => {
       console.log(result.productName);
       console.log(
         result.productName.toString().includes(productName.toString())
       );
+    // productName.array.forEach(element => {
+      
+    // });
       if (
         result.productName.toLowerCase().includes(productName.toLowerCase())
       ) {
@@ -125,7 +131,6 @@ const updateProduct = async (req, res, next) => {
     if (!update) {
       return res.status(404).json({ message: "Product not found ..." });
     }
-
     return res.status(200).json({ message: "Updated successfully", update });
   } catch (error) {
     return res.status(500).json({
@@ -137,7 +142,7 @@ const updateProduct = async (req, res, next) => {
 const deleteProduct = async (req, res, next) => {
   try {
     const { productId } = req.query;
-    const removeProduct = await Product.findOneAndUpdate({ productId });
+    const removeProduct = await Product.findOneAndDelete({ productId });
     if (!removeProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
