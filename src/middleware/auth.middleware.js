@@ -56,5 +56,9 @@ const authorize = function (action, resource) {console.log("lplpl");
     }
   };
 };
+
+const auth = async (req, res, next) =>{
+  
+}
 //    exporting modules
 module.exports = { authenticate, authorize };

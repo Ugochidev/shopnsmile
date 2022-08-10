@@ -85,37 +85,25 @@ const fetchProductByCategory = async (req, res, next) => {
 const fetchProductByname = async (req, res, next) => {
   try {
     const { productName } = req.body;
-    const product = await Product.find({ productName });
-    console.log(productName);
-    console.log(product);
+    const product = await Product.find();
     if (!product) {
       return res.status(400).json({
         message: "Bad request.",
       });
     }
     let searchResult = [];
-    product.forEach(result => {
-      console.log(result.productName);
-      console.log(
-        result.productName.toString().includes(productName.toString())
-      );
-    // productName.array.forEach(element => {
-      
-    // });
+    product.forEach((result) => {
       if (
         result.productName.toLowerCase().includes(productName.toLowerCase())
       ) {
-        console.log(productName);
         searchResult.push(result);
       }
     });
-    console.log(searchResult);
     return res.status(200).json({
       message: "Products fetched successsfully...",
       searchResult,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       message: error.message,
     });
