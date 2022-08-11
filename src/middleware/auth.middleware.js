@@ -1,8 +1,9 @@
 // require dependencies
 const jwt = require("jsonwebtoken");
-const roles = require("../roles");
+const { expressjwt: jwtExpress } = require("express-jwt");
 const User = require("../models/user.model");
 require("dotenv").config();
+const { successResMsg, errorResMsg } = "../utils/response.js";
 
 //  authenticating  user
 const authenticate = async (req, res, next) => {
@@ -25,13 +26,10 @@ const authenticate = async (req, res, next) => {
         message: "Token is required",
       });
     }
-    const decryptToken = await jwt.verify(token, process.env.SECRET_TOKEN);
-    const validUser = await User.findOne({ _id: decryptToken._id });
-    if (!validUser) {
-      return res.status(401).json({
-        message: "Invalid token...",
-      });
-    }
+     const decryptToken = await jwt.verify(token, process.env.SECRET_TOKEN, {
+       expiresIn: "1d",
+     });
+  
     req.user = decryptToken;
     next();
   } catch (error) {
@@ -41,24 +39,28 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-const authorize = function (action, resource) {console.log("lplpl");
-  return async (req, res, next) => {console.log("lplpl");
-    try {
-      const permission = roles.can(req.user.role)[action](resource);
-      if (!permission.granted) {
-        return res.status(401).json({
-          error: "You don't have enough permission to perform this action",
-        });
+const authorize = (roleIds = []) => {
+  if (typeof roleIds === "string") {
+    roleIds = [roleIds];
+  }
+
+  return [
+    // jwtExpress({ secret: process.env.PASS, algorithms: ["HS256"] }),
+
+    // authorize based on user role
+    (req, res, next) => {
+      if (roleIds.length && !roleIds.includes(req.user.role)) {
+        return res.status(401).json({message:
+          `${req.user.role.toUpperCase()} does not have permission to perform this action or access this route`
+      });
       }
+
+      // authentication and authorization successful
       next();
-    } catch (error) {
-      next(error);
-    }
-  };
+      return false;
+    },
+  ];
 };
 
-const auth = async (req, res, next) =>{
-  
-}
 //    exporting modules
 module.exports = { authenticate, authorize };

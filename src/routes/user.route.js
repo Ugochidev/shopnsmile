@@ -1,5 +1,6 @@
 //  require dependencies
 const express = require("express");
+const roles = require("../roles");
 const router = express.Router();
 const { authenticate, authorize } = require("../middleware/auth.middleware");
 const {
@@ -19,7 +20,7 @@ router.post("/auth/user", createUser);
 router.get("/auth/verifyemail", verifyEmail);
 router.post("/auth/resendverificationmail", resendVerificationMail);
 router.post("/auth/login", login);
-// router.get("/auth/getallusers", authenticate([]), getAllUsers);
+router.get("/auth/getallusers", authenticate, authorize([roles.superAdmin, roles.admin]), getAllUsers);
 router.get("/auth/countusers", countUsers);
 router.patch("/auth/resetpassword", authenticate, resetPassword);
 router.get("/auth/getsingleuser", getSingleUser);
