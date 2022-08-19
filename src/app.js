@@ -26,8 +26,8 @@ app.get("/", function (req, res) {
 // route
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/user", userRoute);
-app.use("/api/v1", productRoute)
-app.use("/api/v1", requisitionRoute);
+app.use("/api/v1/product", productRoute)
+app.use("/api/v1/requisition", requisitionRoute);
 
 app.listen(PORT, async () => {
   console.log(`The app is listening on PORT ${PORT}`);
