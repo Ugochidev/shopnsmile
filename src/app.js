@@ -5,6 +5,7 @@ const app = express();
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config();
+const authRoute = require("./routes/auth.route");
 const userRoute = require("./routes/user.route");
 const productRoute = require("./routes/product.route")
 const requisitionRoute = require("./routes/requisition.route");
@@ -23,7 +24,8 @@ app.get("/", function (req, res) {
 });
 
 // route
-app.use("/api/v1", userRoute);
+app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/user", userRoute);
 app.use("/api/v1", productRoute)
 app.use("/api/v1", requisitionRoute);
 

@@ -45,8 +45,6 @@ const authorize = (roleIds = []) => {
   }
 
   return [
-    // jwtExpress({ secret: process.env.PASS, algorithms: ["HS256"] }),
-
     // authorize based on user role
     (req, res, next) => {
       if (roleIds.length && !roleIds.includes(req.user.role)) {

@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const roles = require("../roles");
+const { authenticate, authorize } = require("../middleware/auth.middleware");
 const {
   addProduct,
   fetchAllProduct,
@@ -10,12 +12,27 @@ const {
   deleteProduct,
 } = require("../controllers/product.controller");
 
-router.post("/addproduct", addProduct);
-router.get("/fetchAllproduct", fetchAllProduct);
-router.get("/fetchsingleproduct", fetchSingleProduct);
-router.get("/fetchProductByCategory", fetchProductByCategory);
-router.get("/fetchProductByname", fetchProductByname);
-router.patch("/updateProduct", updateProduct);
-router.delete("/deleteProduct", deleteProduct);
+router.post(
+  "/addproduct",
+  authenticate,
+  authorize([roles.superAdmin, roles.admin, roles.supervisor]),
+  addProduct
+);
+router.get("/fetchAllproduct", authenticate, fetchAllProduct);
+router.get("/fetchsingleproduct", authenticate, fetchSingleProduct);
+router.get("/fetchProductByCategory", authenticate, fetchProductByCategory);
+router.get("/fetchProductByname", authenticate, fetchProductByname);
+router.patch(
+  "/updateProduct",
+  authenticate,
+  authorize([roles.superAdmin, roles.admin, roles.supervisor]),
+  updateProduct
+);
+router.delete(
+  "/deleteProduct",
+  authenticate,
+  authorize([roles.superAdmin, roles.admin]),
+  deleteProduct
+);
 
 module.exports = router;
