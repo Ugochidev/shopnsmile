@@ -1,26 +1,24 @@
 // require dependencies
 const express = require("express");
-const router = express.Router();
 const app = express();
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-dotenv.config();
+require("dotenv").config();
 const authRoute = require("./routes/auth.route");
 const userRoute = require("./routes/user.route");
 const productRoute = require("./routes/product.route")
 const requisitionRoute = require("./routes/requisition.route");
-
+const connectDB = require("./DBconnect/database");
 //  middleware
 app.use(express.json());
 
-const { PORT } = process.env;
+const PORT = process.env.PORT || 2016;
 
 // connecting to DB
-const connectDB = require("./DBconnect/database");
-connectDB;
+
+connectDB();
 // Base route
-app.get("/", function (req, res) {
-  res.send("Hello World!");
+app.get("/", (req, res)=> {
+   res.send("Hello World!");
+  
 });
 
 // route

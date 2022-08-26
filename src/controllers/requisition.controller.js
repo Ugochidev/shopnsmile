@@ -3,14 +3,15 @@ const uuid = require("uuid");
 
 const createRequisition = async (req, res, next) => {
   try {
-    const id = req.user.userId;
+    const { productId, userId } = req.query;
+    const id = req.user._id
     console.log(id);
-    const { productId, userId, collectedBy, dateCreated, quantityCollected } =
+    const {collectedBy, dateCreated, quantityCollected } =
       req.body;
     const newRequisition = new Requisition({
       requisitionId: uuid.v4(),
       productId,
-      userId,
+      userId: id,
       collectedBy,
       dateCreated,
       quantityCollected,
@@ -98,7 +99,7 @@ const deleteRequisition = async (req, res, next) => {
     }
     return res
       .status(200)
-      .json({ message: "Requisition deleted successfully ....",});
+      .json({ message: "Requisition deleted successfully ...." });
   } catch (error) {
     return res.status(500).json({
       messsage: error.message,

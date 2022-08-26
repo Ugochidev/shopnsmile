@@ -5,16 +5,16 @@ dotenv.config();
 //  creating connection to database
 const { DATABASE_URL } = process.env;
 
-const connectDB = async () => {
+const connectDB =() => {
   try {
-    await mongoose.connect(DATABASE_URL, {
+   mongoose.connect(DATABASE_URL, {
       useUnifiedTopology: true,
       useNewUrlParser: true,
     });
-    console.log("server is up and running");
+    console.log("Database is connected");
   } catch (error) {
-    console.log("server is down");
+    console.log("Database connection failed");
   }
 };
 //   exporting modules
-module.exports = connectDB();
+module.exports = connectDB;

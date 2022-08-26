@@ -152,6 +152,7 @@ const login = async (req, res, next) => {
       return res.status(401).json({ message: "User not verified" });
     }
     const data = {
+      _id: emailExist._id,
       userId: emailExist.userId,
       role: emailExist.role,
     };
