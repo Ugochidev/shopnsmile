@@ -3,15 +3,13 @@ const uuid = require("uuid");
 
 const createRequisition = async (req, res, next) => {
   try {
-    const { productId, userId } = req.query;
-    const id = req.user._id
+    const { productId } = req.query;
+    const id = req.user._id;
     console.log(id);
-    const {collectedBy, dateCreated, quantityCollected } =
-      req.body;
+    const { collectedBy, dateCreated, quantityCollected } = req.body;
     const newRequisition = new Requisition({
       requisitionId: uuid.v4(),
       productId,
-      userId: id,
       collectedBy,
       dateCreated,
       quantityCollected,
@@ -54,9 +52,6 @@ const fetchAllRequisition = async (req, res, next) => {
     const allRequisition = await Requisition.find().populate(
       "userId productId"
     );
-    if (!allRequisition) {
-      return res.status(404).json({ message: "NO requisition found" });
-    }
     return res
       .status(200)
       .json({ message: "fetched successfully ....", allRequisition });
@@ -70,6 +65,12 @@ const fetchAllRequisition = async (req, res, next) => {
 const updateRequisition = async (req, res, next) => {
   try {
     const { requisitionId } = req.query;
+    const removeRequisition = await Requisition.findOne({
+      requisitionId,
+    });
+    if (!removeRequisition) {
+      return res.status(404).json({ message: "Requisition not found" });
+    }
     const update = await Requisition.findOneAndUpdate(
       { requisitionId },
       req.body,
