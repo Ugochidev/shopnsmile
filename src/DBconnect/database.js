@@ -7,6 +7,7 @@ const { DATABASE_URL } = process.env;
 
 const connectDB =() => {
   try {
+mongoose.set("strictQuery", false);
    mongoose.connect(DATABASE_URL, {
       useUnifiedTopology: true,
       useNewUrlParser: true,

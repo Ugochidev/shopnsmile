@@ -10,6 +10,7 @@ const connectDB = require("./DBconnect/database");
 //  middleware
 app.use(express.json());
 
+
 const PORT = process.env.PORT || 2016;
 
 // connecting to DB
