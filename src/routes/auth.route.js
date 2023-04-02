@@ -12,6 +12,9 @@ const {
   changePassword,
 } = require("../controllers/auth.controller");
 
+
+//  creating a route
+
 router.post(
   "/user",
   authenticate,

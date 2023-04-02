@@ -8,8 +8,9 @@ const {
   countUsers,
   getSingleUser,
 } = require("../controllers/user.controller");
-//  creating a route
 
+
+//  creating a route
 router.get("/auth/getallusers", authenticate, authorize([roles.superAdmin, roles.admin]), getAllUsers);
 router.get(
   "/auth/countusers",

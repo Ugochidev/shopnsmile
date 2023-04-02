@@ -1,9 +1,6 @@
 // require dependencies
 const jwt = require("jsonwebtoken");
-const { expressjwt: jwtExpress } = require("express-jwt");
-const User = require("../models/user.model");
 require("dotenv").config();
-const { successResMsg, errorResMsg } = "../utils/response.js";
 
 //  authenticating  user
 const authenticate = async (req, res, next) => {

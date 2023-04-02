@@ -10,6 +10,7 @@ const {
   deleteRequisition,
 } = require("../controllers/requisition.controller");
 
+//  creating a route
 router.post(
   "/createRequisition",
   authenticate,

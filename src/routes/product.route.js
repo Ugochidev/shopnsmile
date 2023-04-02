@@ -12,6 +12,8 @@ const {
   deleteProduct,
 } = require("../controllers/product.controller");
 
+
+//  creating a route
 router.post(
   "/addproduct",
   authenticate,
