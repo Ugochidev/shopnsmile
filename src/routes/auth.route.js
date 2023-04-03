@@ -23,7 +23,7 @@ router.post(
 );
 router.get("/verifyemail", verifyEmail);
 router.post("/resendverificationmail", resendVerificationMail);
-router.post("/login", login);
+router.post("/loginuser", login);
 router.post("/forgetpasswordlink/", forgetPasswordLink);
 router.patch("/changeassword/", changePassword);
 router.patch("/resetpassword", authenticate, resetPassword);
