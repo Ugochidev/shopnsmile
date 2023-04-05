@@ -41,5 +41,4 @@ router.delete(
   authorize([roles.superAdmin, roles.admin]),
   deleteRequisition
 );
-
 module.exports = router;
