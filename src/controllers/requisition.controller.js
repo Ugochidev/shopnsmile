@@ -24,7 +24,6 @@ const createRequisition = async (req, res, next) => {
     });
   }
 };
-
 const fetchRequisition = async (req, res, next) => {
   try {
     const { requisitionId } = req.query;
